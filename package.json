@@ -1,0 +1,35 @@
+{
+  "name": "dr-khurram-whatsapp-ai-appointment-chatbot",
+  "version": "1.0.0",
+  "description": "Production-ready Healthcare WhatsApp AI Appointment Chatbot for Dr. Khurram.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "luxon": "^3.5.0",
+    "mongoose": "^8.6.1",
+    "node-cron": "^3.0.3",
+    "openai": "^4.56.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

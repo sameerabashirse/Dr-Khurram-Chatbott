@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dr. Khurram | WhatsApp AI Appointment Assistant</title>
+  <meta name="description" content="Secure appointment booking and WhatsApp AI receptionist for Dr. Khurram.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="Dr. Khurram home">
+      <span class="brand-mark">DK</span>
+      <span>
+        <strong>Dr. Khurram</strong>
+        <small>Appointment Care</small>
+      </span>
+    </a>
+    <button class="icon-button menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">☰</button>
+    <nav id="main-nav" class="main-nav">
+      <a href="#doctor">Doctor</a>
+      <a href="#timings">Timings</a>
+      <a href="#appointments">Appointments</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#contact">Contact</a>
+      <a href="#staff" class="staff-link">Staff Panel</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="home" class="hero section-band">
+      <div class="hero-copy">
+        <span class="eyebrow">Official WhatsApp appointment assistant</span>
+        <h1>Dr. Khurram</h1>
+        <p>Book, check, reschedule, or cancel clinic appointments through a secure appointment system connected to WhatsApp Cloud API.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#appointments">Book appointment</a>
+          <a class="button ghost" href="https://wa.me/923357504478" rel="noopener" target="_blank">Open WhatsApp</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <img src="assets/dr-khurram-neutral-doctor.png" alt="Neutral professional doctor placeholder for Dr. Khurram">
+        <div class="token-preview" aria-label="Appointment token preview">
+          <span>Appointment ID</span>
+          <strong>KHR-2026-000123</strong>
+          <span>Token</span>
+          <strong>014</strong>
+        </div>
+      </div>
+    </section>
+
+    <section id="doctor" class="section">
+      <div class="section-heading">
+        <span class="eyebrow">Doctor profile</span>
+        <h2>Professional details are staff-managed until verified</h2>
+        <p>No specialty, qualifications, experience, biography, or address are invented. Staff can update verified details from the secure panel.</p>
+      </div>
+      <div class="profile-grid">
+        <figure class="doctor-card">
+          <img id="doctor-image" src="assets/dr-khurram-neutral-doctor.png" alt="Neutral professional doctor placeholder">
+          <figcaption>
+            <strong id="doctor-name">Dr. Khurram</strong>
+            <span id="doctor-contact">+92 335 7504478</span>
+          </figcaption>
+        </figure>
+        <div class="info-list">
+          <div><span>Specialty</span><strong id="doctor-specialty">Pending verification</strong></div>
+          <div><span>Qualifications</span><strong id="doctor-qualifications">Pending verification</strong></div>
+          <div><span>Experience</span><strong id="doctor-experience">Pending verification</strong></div>
+          <div><span>Clinic location</span><strong id="doctor-location">Pending verification</strong></div>
+          <div><span>Biography</span><p id="doctor-biography">Staff can add the verified professional biography after approval.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="timings" class="section section-band">
+      <div class="section-heading">
+        <span class="eyebrow">Clinic schedule</span>
+        <h2>Monday to Friday, 9:00 AM to 4:00 PM</h2>
+        <p>Saturday and Sunday are closed. The system blocks weekends, past dates, and expired slots automatically.</p>
+      </div>
+      <div class="timing-grid">
+        <div class="metric"><span>Open days</span><strong>Mon-Fri</strong></div>
+        <div class="metric"><span>Clinic hours</span><strong>09:00-16:00</strong></div>
+        <div class="metric"><span>Weekend</span><strong>Closed</strong></div>
+        <div class="metric"><span>Contact</span><strong>+92 335 7504478</strong></div>
+      </div>
+    </section>
+
+    <section id="services" class="section">
+      <div class="section-heading">
+        <span class="eyebrow">Patient services</span>
+        <h2>Appointment support in the patient’s language</h2>
+      </div>
+      <div class="card-grid">
+        <article><h3>Book appointments</h3><p>Collects consent, patient details, reason, date, and time, then creates a real MongoDB appointment.</p></article>
+        <article><h3>Check status</h3><p>Looks up appointments only with appointment ID plus patient phone number.</p></article>
+        <article><h3>Reschedule safely</h3><p>Checks availability, preserves history, cancels old reminders, and schedules new ones.</p></article>
+        <article><h3>Cancel without deletion</h3><p>Preserves appointment records, releases the slot, and records audit logs.</p></article>
+        <article><h3>WhatsApp reminders</h3><p>Uses approved Meta utility templates for reminders outside the WhatsApp service window.</p></article>
+        <article><h3>Human staff support</h3><p>Staff can pause automation, take over conversations, and return chats to AI mode.</p></article>
+      </div>
+    </section>
+
+    <section id="appointments" class="section appointment-workspace">
+      <div class="section-heading">
+        <span class="eyebrow">Appointments</span>
+        <h2>Book, look up, reschedule, or cancel</h2>
+        <p>Every action below submits to the backend. Success appears only after the server confirms the operation.</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Appointment actions">
+        <button class="tab active" type="button" data-public-tab="book">Book</button>
+        <button class="tab" type="button" data-public-tab="lookup">Lookup</button>
+        <button class="tab" type="button" data-public-tab="reschedule">Reschedule</button>
+        <button class="tab" type="button" data-public-tab="cancel">Cancel</button>
+      </div>
+
+      <div class="appointment-layout">
+        <div class="form-panels">
+          <form id="booking-form" class="panel active" data-panel="book">
+            <div class="form-grid">
+              <label>Full name<input name="fullName" autocomplete="name" required></label>
+              <label>WhatsApp phone<input name="phone" autocomplete="tel" placeholder="+92..." required></label>
+              <label>Age<input name="age" type="number" min="0" max="130" required></label>
+              <label>Gender<select name="gender"><option value="not_provided">Not provided</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select></label>
+              <label>Preferred language<input name="preferredLanguage" value="en" required></label>
+              <label>Preferred date<input name="date" type="date" required></label>
+              <label>Available time<select name="time" required><option value="">Select date first</option></select></label>
+              <label class="wide">Reason<textarea name="reason" rows="3" required></textarea></label>
+              <label class="wide">Optional note<textarea name="optionalNote" rows="2"></textarea></label>
+              <label class="check wide"><input name="consentGiven" type="checkbox" required> I consent to use my information only for appointment management, reminders, rescheduling, and cancellation support.</label>
+            </div>
+            <button class="button primary" type="submit">Create appointment</button>
+            <p class="form-status" aria-live="polite"></p>
+          </form>
+
+          <form id="lookup-form" class="panel" data-panel="lookup">
+            <label>Appointment ID<input name="appointmentId" placeholder="KHR-2026-000123" required></label>
+            <label>Phone number<input name="phone" placeholder="+92..." required></label>
+            <button class="button primary" type="submit">Check appointment</button>
+            <p class="form-status" aria-live="polite"></p>
+          </form>
+
+          <form id="reschedule-form" class="panel" data-panel="reschedule">
+            <div class="form-grid">
+              <label>Appointment ID<input name="appointmentId" placeholder="KHR-2026-000123" required></label>
+              <label>Phone number<input name="phone" placeholder="+92..." required></label>
+              <label>New date<input name="date" type="date" required></label>
+              <label>Available time<select name="time" required><option value="">Select date first</option></select></label>
+              <label class="wide">Reason<textarea name="reason" rows="2"></textarea></label>
+            </div>
+            <button class="button primary" type="submit">Reschedule appointment</button>
+            <p class="form-status" aria-live="polite"></p>
+          </form>
+
+          <form id="cancel-form" class="panel" data-panel="cancel">
+            <label>Appointment ID<input name="appointmentId" placeholder="KHR-2026-000123" required></label>
+            <label>Phone number<input name="phone" placeholder="+92..." required></label>
+            <label>Cancellation reason<textarea name="reason" rows="2"></textarea></label>
+            <button class="button danger" type="submit">Cancel appointment</button>
+            <p class="form-status" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <aside id="token-card" class="appointment-token empty" aria-live="polite">
+          <div class="token-header">
+            <span>Dr. Khurram</span>
+            <strong>Appointment Token</strong>
+          </div>
+          <div class="qr-grid" aria-hidden="true"></div>
+          <dl>
+            <div><dt>Appointment ID</dt><dd data-token="appointmentId">Waiting</dd></div>
+            <div><dt>Token number</dt><dd data-token="tokenNumber">---</dd></div>
+            <div><dt>Date</dt><dd data-token="date">---</dd></div>
+            <div><dt>Time</dt><dd data-token="time">---</dd></div>
+            <div><dt>Status</dt><dd data-token="status">---</dd></div>
+            <div><dt>Contact</dt><dd>+92 335 7504478</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <section id="how" class="section section-band">
+      <div class="section-heading">
+        <span class="eyebrow">How it works</span>
+        <h2>Same rules across website, staff panel, and WhatsApp</h2>
+      </div>
+      <ol class="steps">
+        <li>Patient gives consent and selects a clinic slot.</li>
+        <li>Backend validates date, time, blocked slots, duplicates, and past slots.</li>
+        <li>MongoDB stores the appointment, token, consent, reminders, and audit event.</li>
+        <li>WhatsApp messages and delivery callbacks are logged through Meta webhooks.</li>
+      </ol>
+    </section>
+
+    <section id="privacy" class="section">
+      <div class="section-heading">
+        <span class="eyebrow">Privacy and safety</span>
+        <h2>Designed for appointment management only</h2>
+      </div>
+      <div class="card-grid">
+        <article><h3>Limited data collection</h3><p>No CNIC, passport, card number, or unnecessary medical history is requested.</p></article>
+        <article><h3>Opt-out supported</h3><p>Patients can send STOP, Unsubscribe, بند, or “Messages band kar dein”.</p></article>
+        <article><h3>Emergency guidance first</h3><p>The assistant does not diagnose or prescribe, and urgent symptoms receive emergency guidance immediately.</p></article>
+      </div>
+    </section>
+
+    <section id="faq" class="section section-band">
+      <div class="section-heading">
+        <span class="eyebrow">FAQ</span>
+        <h2>Common questions</h2>
+      </div>
+      <details><summary>Can I book on Saturday or Sunday?</summary><p>No. The clinic is closed on Saturday and Sunday.</p></details>
+      <details><summary>Can I check an appointment with only the appointment ID?</summary><p>No. Appointment lookup requires both appointment ID and patient phone number.</p></details>
+      <details><summary>Does the chatbot give medical advice?</summary><p>No. It supports appointment tasks and safe emergency guidance only.</p></details>
+    </section>
+
+    <section id="contact" class="section contact-band">
+      <div>
+        <span class="eyebrow">Contact</span>
+        <h2>Clinic contact number</h2>
+        <p class="large-phone">+92 335 7504478</p>
+      </div>
+      <a class="button primary" href="https://wa.me/923357504478" rel="noopener" target="_blank">Message on WhatsApp</a>
+    </section>
+
+    <section id="staff" class="section staff-section">
+      <div class="section-heading">
+        <span class="eyebrow">Secure staff control panel</span>
+        <h2>Operations dashboard</h2>
+        <p>No public staff registration and no preset production account. First Super Admin setup is available only before any staff user exists.</p>
+      </div>
+
+      <div id="staff-auth" class="staff-auth">
+        <form id="setup-form" class="auth-card hidden">
+          <h3>First Super Admin Setup</h3>
+          <label>Name<input name="name" required></label>
+          <label>Email<input name="email" type="email" required></label>
+          <label>Password<input name="password" type="password" minlength="12" required></label>
+          <button class="button primary" type="submit">Create Super Admin</button>
+          <p class="form-status" aria-live="polite"></p>
+        </form>
+
+        <form id="login-form" class="auth-card hidden">
+          <h3>Staff Login</h3>
+          <label>Email<input name="email" type="email" required></label>
+          <label>Password<input name="password" type="password" required></label>
+          <button class="button primary" type="submit">Login</button>
+          <p class="form-status" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div id="staff-dashboard" class="dashboard hidden">
+        <div class="dashboard-top">
+          <div>
+            <strong id="staff-user">Signed in</strong>
+            <span id="staff-role"></span>
+          </div>
+          <button id="logout-button" class="button ghost" type="button">Logout</button>
+        </div>
+
+        <div class="tabs staff-tabs" role="tablist" aria-label="Staff tools">
+          <button class="tab active" type="button" data-staff-tab="appointments-panel">Appointments</button>
+          <button class="tab" type="button" data-staff-tab="manual-panel">Manual entry</button>
+          <button class="tab" type="button" data-staff-tab="conversations-panel">WhatsApp</button>
+          <button class="tab" type="button" data-staff-tab="settings-panel">Settings</button>
+          <button class="tab" type="button" data-staff-tab="users-panel">Users</button>
+          <button class="tab" type="button" data-staff-tab="audit-panel">Audit</button>
+        </div>
+
+        <div id="appointments-panel" class="staff-panel active">
+          <div class="toolbar">
+            <input id="appointment-search" placeholder="Search ID, name, or phone">
+            <input id="appointment-date-filter" type="date">
+            <select id="appointment-status-filter">
+              <option value="">All statuses</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="rescheduled">Rescheduled</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="visited">Visited</option>
+              <option value="no_show">No-show</option>
+            </select>
+            <button id="refresh-appointments" class="button ghost" type="button">Refresh</button>
+          </div>
+          <div id="appointments-table" class="table-card empty-state">No appointments loaded.</div>
+        </div>
+
+        <div id="manual-panel" class="staff-panel">
+          <form id="manual-form" class="panel active">
+            <div class="form-grid">
+              <label>Full name<input name="fullName" required></label>
+              <label>Phone<input name="phone" required></label>
+              <label>Age<input name="age" type="number" min="0" max="130" required></label>
+              <label>Gender<select name="gender"><option value="not_provided">Not provided</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select></label>
+              <label>Language<input name="preferredLanguage" value="en"></label>
+              <label>Date<input name="date" type="date" required></label>
+              <label>Time<select name="time" required><option value="">Select date first</option></select></label>
+              <label class="wide">Reason<textarea name="reason" rows="2" required></textarea></label>
+            </div>
+            <button class="button primary" type="submit">Add manual appointment</button>
+            <p class="form-status" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <div id="conversations-panel" class="staff-panel">
+          <div class="split-panel">
+            <div>
+              <button id="refresh-conversations" class="button ghost" type="button">Refresh conversations</button>
+              <div id="conversation-list" class="list-card empty-state">No conversations loaded.</div>
+            </div>
+            <div>
+              <div id="message-list" class="message-list empty-state">Select a conversation.</div>
+              <form id="staff-message-form" class="message-form">
+                <input name="message" placeholder="Send staff WhatsApp message" required>
+                <button class="button primary" type="submit">Send</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div id="settings-panel" class="staff-panel">
+          <div class="settings-grid">
+            <form id="doctor-settings-form" class="panel active">
+              <h3>Doctor profile settings</h3>
+              <label>Doctor name<input name="doctorName"></label>
+              <label>Contact number<input name="contactNumber"></label>
+              <label>Specialty<input name="specialty"></label>
+              <label>Qualifications<input name="qualifications"></label>
+              <label>Experience<input name="experience"></label>
+              <label>Clinic location<textarea name="clinicLocation" rows="2"></textarea></label>
+              <label>Biography<textarea name="biography" rows="3"></textarea></label>
+              <button class="button primary" type="submit">Save doctor profile</button>
+              <p class="form-status" aria-live="polite"></p>
+            </form>
+
+            <form id="clinic-settings-form" class="panel active">
+              <h3>Clinic and reminders</h3>
+              <label>Contact number<input name="contactNumber"></label>
+              <label>Timezone<input name="timezone" value="Asia/Karachi"></label>
+              <label>Slot duration minutes<input name="slotDurationMinutes" type="number" min="5" max="240"></label>
+              <label>Reminder intervals minutes<input name="reminderIntervalsMinutes" placeholder="4320,1440,120"></label>
+              <button class="button primary" type="submit">Save clinic settings</button>
+              <p class="form-status" aria-live="polite"></p>
+            </form>
+
+            <form id="block-date-form" class="panel active">
+              <h3>Blocked dates</h3>
+              <label>Date<input name="date" type="date" required></label>
+              <label>Reason<input name="reason"></label>
+              <button class="button danger" type="submit">Block date</button>
+              <button class="button ghost" type="button" data-unblock-date>Unblock date</button>
+              <p class="form-status" aria-live="polite"></p>
+            </form>
+
+            <form id="block-slot-form" class="panel active">
+              <h3>Blocked slots</h3>
+              <label>Date<input name="date" type="date" required></label>
+              <label>Time<input name="time" type="time" required></label>
+              <label>Reason<input name="reason"></label>
+              <button class="button danger" type="submit">Block slot</button>
+              <button class="button ghost" type="button" data-unblock-slot>Unblock slot</button>
+              <p class="form-status" aria-live="polite"></p>
+            </form>
+          </div>
+        </div>
+
+        <div id="users-panel" class="staff-panel">
+          <form id="staff-user-form" class="panel active">
+            <h3>Staff user management</h3>
+            <div class="form-grid">
+              <label>Name<input name="name" required></label>
+              <label>Email<input name="email" type="email" required></label>
+              <label>Password<input name="password" type="password" minlength="12" required></label>
+              <label>Role<select name="role"><option value="receptionist">Receptionist</option><option value="admin">Admin</option><option value="super_admin">Super Admin</option></select></label>
+            </div>
+            <button class="button primary" type="submit">Create staff user</button>
+            <p class="form-status" aria-live="polite"></p>
+          </form>
+          <div id="staff-users-list" class="table-card empty-state">No users loaded.</div>
+        </div>
+
+        <div id="audit-panel" class="staff-panel">
+          <button id="refresh-audit" class="button ghost" type="button">Refresh audit logs</button>
+          <div id="audit-list" class="table-card empty-state">No audit logs loaded.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <a class="floating-whatsapp" href="https://wa.me/923357504478" rel="noopener" target="_blank" aria-label="Open WhatsApp">WA</a>
+
+  <footer class="site-footer">
+    <p>© <span id="year"></span> Dr. Khurram Appointment Care. Appointment system only; not a substitute for emergency medical care.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
