@@ -13,7 +13,7 @@ const {
 } = require("../services/authService");
 const { audit } = require("../services/auditService");
 const { requireAuth, requireRole } = require("../middleware/auth");
-const { loginLimiters, setupLimiter, resetAccountFailedLoginLimit } = require("../middleware/security");
+const { authLimiter } = require("../middleware/security");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { badRequest } = require("../utils/errors");
 
@@ -36,20 +36,19 @@ router.get("/setup-status", asyncHandler(async (req, res) => {
   res.json({ success: true, setupRequired: await setupRequired() });
 }));
 
-router.post("/setup", setupLimiter, asyncHandler(async (req, res) => {
+router.post("/setup", authLimiter, asyncHandler(async (req, res) => {
   const input = validate(staffSchema.omit({ role: true }), req.body);
   const user = await setupSuperAdmin(input);
   await audit({ actorType: "system", action: "staff.super_admin_setup", entityType: "staff", entityId: user._id.toString(), req });
   res.status(201).json({ success: true, user: publicStaffUser(user) });
 }));
 
-router.post("/login", ...loginLimiters, asyncHandler(async (req, res) => {
+router.post("/login", authLimiter, asyncHandler(async (req, res) => {
   const input = validate(z.object({
     email: z.string().email(),
     password: z.string().min(1)
   }), req.body);
   const result = await login(input, req, res);
-  resetAccountFailedLoginLimit(req, res);
   await audit({ actorType: "staff", actorStaff: result.user.id, action: "staff.login", entityType: "staff", entityId: String(result.user.id), req });
   res.json({ success: true, ...result });
 }));

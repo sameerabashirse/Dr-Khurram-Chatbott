@@ -28,10 +28,4 @@ function conflict(message, details) {
   return new AppError(409, "CONFLICT", message, details);
 }
 
-function tooManyRequests(message, retryAfterSeconds) {
-  const error = new AppError(429, "RATE_LIMITED", message);
-  error.retryAfterSeconds = retryAfterSeconds;
-  return error;
-}
-
-module.exports = { AppError, badRequest, unauthorized, forbidden, notFound, conflict, tooManyRequests };
+module.exports = { AppError, badRequest, unauthorized, forbidden, notFound, conflict };

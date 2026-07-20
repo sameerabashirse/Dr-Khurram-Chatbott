@@ -24,11 +24,11 @@
     box.textContent = message || "";
   }
 
-  function setLoading(form, loading, loadingText = "Working...") {
+  function setLoading(form, loading) {
     $$("button", form).forEach((button) => {
       button.disabled = loading;
       if (loading && !button.dataset.originalText) button.dataset.originalText = button.textContent;
-      if (loading) button.textContent = loadingText;
+      if (loading) button.textContent = "Working...";
       if (!loading && button.dataset.originalText) {
         button.textContent = button.dataset.originalText;
         delete button.dataset.originalText;
@@ -72,9 +72,7 @@
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok || data.success === false) {
-      const error = new Error(data.error?.message || `Request failed: ${response.status}`);
-      error.status = response.status;
-      throw error;
+      throw new Error(data.error?.message || `Request failed: ${response.status}`);
     }
     return data;
   }
@@ -262,24 +260,19 @@
     $("#login-form")?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.currentTarget;
-      await window.authSubmission.runOnce(form, async () => {
-        setLoading(form, true, "Signing in...");
-        setStatus(form, "Signing in...");
-        try {
-          const data = await api("/api/auth/login", { method: "POST", body: formPayload(form) });
-          state.accessToken = data.accessToken;
-          state.staffUser = data.user;
-          setStatus(form, "Signed in.", "success");
-          showDashboard();
-        } catch (error) {
-          const safeMessage = error.status === 401 || error.status === 429
-            ? error.message
-            : "We could not sign you in right now. Please try again.";
-          setStatus(form, safeMessage, "error");
-        } finally {
-          setLoading(form, false);
-        }
-      });
+      setLoading(form, true);
+      setStatus(form, "Signing in...");
+      try {
+        const data = await api("/api/auth/login", { method: "POST", body: formPayload(form) });
+        state.accessToken = data.accessToken;
+        state.staffUser = data.user;
+        setStatus(form, "Signed in.", "success");
+        showDashboard();
+      } catch (error) {
+        setStatus(form, error.message, "error");
+      } finally {
+        setLoading(form, false);
+      }
     });
 
     $("#logout-button")?.addEventListener("click", async () => {

@@ -78,7 +78,6 @@ JWT_REFRESH_SECRET
 COOKIE_SECRET
 FRONTEND_URL
 CORS_ORIGINS
-TRUST_PROXY
 OPENAI_API_KEY
 WHATSAPP_ACCESS_TOKEN
 WHATSAPP_PHONE_NUMBER_ID
@@ -144,8 +143,6 @@ The assistant is constrained to appointment management, clinic information, safe
 
 Use a production MongoDB deployment, HTTPS, a stable public domain, and environment variables managed by the hosting provider.
 
-Set `TRUST_PROXY` to the verified Hostinger/reverse-proxy topology: use an exact hop count such as `1`, or a comma-separated list of trusted proxy addresses/CIDRs. Leave it `false` without a proxy. The app rejects unsafe `true` and `*` values. Confirm the value from the hosting request path before deployment so `req.ip` identifies clients without trusting arbitrary forwarded headers.
-
 ```bash
 npm install --omit=dev --no-audit --no-fund
 npm start
@@ -174,11 +171,6 @@ Production checklist:
 
 ```bash
 npm test
-npm run test:integration
-npm run test:coverage
-npm run build
-npm run check:dummy-content
-npm audit
 ```
 
-The integration suite uses an ephemeral, isolated MongoDB and never connects to the configured application database. Tests cover authentication limits and lock expiry, repeated successful login, refresh/logout/relogin, proxy identity handling, duplicate submission protection, and clinic slot validation.
+Current tests cover clinic slot validation for weekdays, weekends, out-of-hours slots, and past slots.

@@ -17,9 +17,6 @@ function errorHandler(error, req, res, next) {
   };
 
   if (isTrusted && error.details) body.error.details = error.details;
-  if (isTrusted && error.retryAfterSeconds) {
-    res.setHeader("Retry-After", String(Math.max(1, Math.ceil(error.retryAfterSeconds))));
-  }
   if (!config.isProduction && !isTrusted) body.error.debug = error.message;
 
   if (!isTrusted) {
