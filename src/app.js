@@ -13,7 +13,7 @@ function createApp() {
   const app = express();
   const rootDir = path.resolve(__dirname, "..");
 
-  app.set("trust proxy", 1);
+  app.set("trust proxy", config.trustProxy);
   app.disable("x-powered-by");
 
   app.use(helmet({

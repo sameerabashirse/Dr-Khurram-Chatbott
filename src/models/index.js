@@ -16,6 +16,7 @@ const staffUserSchema = new Schema({
   role: { type: String, enum: ["super_admin", "admin", "receptionist"], default: "receptionist" },
   isActive: { type: Boolean, default: true },
   failedLoginAttempts: { type: Number, default: 0 },
+  lastFailedLoginAt: { type: Date },
   lockUntil: { type: Date },
   passwordChangedAt: { type: Date },
   lastLoginAt: { type: Date }

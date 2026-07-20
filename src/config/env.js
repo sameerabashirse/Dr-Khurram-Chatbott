@@ -7,6 +7,7 @@ const requiredInProduction = [
   "COOKIE_SECRET",
   "FRONTEND_URL",
   "CORS_ORIGINS",
+  "TRUST_PROXY",
   "WHATSAPP_ACCESS_TOKEN",
   "WHATSAPP_PHONE_NUMBER_ID",
   "WHATSAPP_BUSINESS_ACCOUNT_ID",
@@ -43,6 +44,22 @@ function readOrigins() {
     .filter(Boolean);
 }
 
+function parseTrustProxy(rawValue) {
+  const value = String(rawValue || "").trim();
+  if (!value || value.toLowerCase() === "false") return false;
+  if (/^[1-9]\d*$/.test(value)) return Number(value);
+
+  const entries = value.split(",").map((entry) => entry.trim()).filter(Boolean);
+  if (!entries.length || entries.some((entry) => ["true", "*"].includes(entry.toLowerCase()))) {
+    throw new Error("TRUST_PROXY must be a proxy hop count or a comma-separated list of trusted addresses/subnets");
+  }
+  return entries;
+}
+
+function readTrustProxy() {
+  return parseTrustProxy(read("TRUST_PROXY"));
+}
+
 const config = {
   nodeEnv,
   isProduction,
@@ -55,6 +72,7 @@ const config = {
   cookieSecret: read("COOKIE_SECRET", "dev-only-change-this-cookie-secret"),
   accessTokenTtl: read("ACCESS_TOKEN_TTL", "15m"),
   refreshTokenTtlDays: readNumber("REFRESH_TOKEN_TTL_DAYS", 30),
+  trustProxy: readTrustProxy(),
   clinicTimezone: read("CLINIC_TIMEZONE", "Asia/Karachi"),
   clinicContactNumber: read("CLINIC_CONTACT_NUMBER", "+92 335 7504478"),
   openaiApiKey: read("OPENAI_API_KEY"),
@@ -75,4 +93,4 @@ const config = {
   }
 };
 
-module.exports = { config };
+module.exports = { config, parseTrustProxy };

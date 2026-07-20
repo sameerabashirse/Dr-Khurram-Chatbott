@@ -2,12 +2,13 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { StaffUser, RefreshTokenSession } = require("../models");
 const { config } = require("../config/env");
-const { badRequest, conflict, forbidden, unauthorized, notFound } = require("../utils/errors");
+const { badRequest, conflict, unauthorized, notFound, tooManyRequests } = require("../utils/errors");
 const { randomToken, sha256 } = require("../utils/security");
 const { refreshCookieName } = require("../middleware/auth");
 
-const lockoutAttempts = 5;
+const lockoutAttempts = 10;
 const lockoutMinutes = 15;
+const lockoutWindowMs = lockoutMinutes * 60 * 1000;
 
 function validatePassword(password) {
   const value = String(password || "");
@@ -81,27 +82,64 @@ function clearRefreshCookie(res) {
 }
 
 async function login({ email, password }, req, res) {
-  const user = await StaffUser.findOne({ email: String(email || "").toLowerCase() }).select("+passwordHash");
-  if (!user || !user.isActive) throw unauthorized("Invalid email or password.");
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  const user = await StaffUser.findOne({ email: normalizedEmail }).select("+passwordHash");
+  if (!user || !user.isActive) throw unauthorized("Email or password is incorrect.");
 
   if (user.lockUntil && user.lockUntil > new Date()) {
-    throw forbidden("Account is temporarily locked after repeated failed login attempts.");
+    const retryAfterSeconds = Math.ceil((user.lockUntil.getTime() - Date.now()) / 1000);
+    const minutes = Math.max(1, Math.ceil(retryAfterSeconds / 60));
+    throw tooManyRequests(
+      `Too many unsuccessful sign-in attempts. Please wait ${minutes} minute${minutes === 1 ? "" : "s"} and try again.`,
+      retryAfterSeconds
+    );
   }
 
   const matches = await bcrypt.compare(String(password || ""), user.passwordHash);
   if (!matches) {
-    user.failedLoginAttempts += 1;
-    if (user.failedLoginAttempts >= lockoutAttempts) {
-      user.lockUntil = new Date(Date.now() + lockoutMinutes * 60 * 1000);
-    }
-    await user.save();
-    throw unauthorized("Invalid email or password.");
+    const now = new Date();
+    const windowStart = new Date(now.getTime() - lockoutWindowMs);
+    await StaffUser.findOneAndUpdate(
+      { _id: user._id },
+      [{
+        $set: {
+          failedLoginAttempts: {
+            $cond: [
+              { $gte: [{ $ifNull: ["$lastFailedLoginAt", new Date(0)] }, windowStart] },
+              { $add: [{ $ifNull: ["$failedLoginAttempts", 0] }, 1] },
+              1
+            ]
+          },
+          lastFailedLoginAt: now
+        }
+      }, {
+        $set: {
+          lockUntil: {
+            $cond: [
+              { $gte: ["$failedLoginAttempts", lockoutAttempts] },
+              new Date(now.getTime() + lockoutWindowMs),
+              "$lockUntil"
+            ]
+          }
+        }
+      }],
+      { new: true }
+    );
+    throw unauthorized("Email or password is incorrect.");
   }
 
+  const loggedInAt = new Date();
+  await StaffUser.updateOne(
+    { _id: user._id },
+    {
+      $set: { failedLoginAttempts: 0, lastLoginAt: loggedInAt },
+      $unset: { lockUntil: 1, lastFailedLoginAt: 1 }
+    }
+  );
   user.failedLoginAttempts = 0;
   user.lockUntil = undefined;
-  user.lastLoginAt = new Date();
-  await user.save();
+  user.lastFailedLoginAt = undefined;
+  user.lastLoginAt = loggedInAt;
 
   const accessToken = signAccessToken(user);
   const refresh = await issueRefreshToken(user, req);
