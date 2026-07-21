@@ -31,7 +31,7 @@ async function updateClinicSettings(input, staffUser) {
 
   return ClinicSettings.findOneAndUpdate(
     { key: "default" },
-    { $set: allowed, $setOnInsert: { key: "default" } },
+    { $set: allowed },
     { new: true, upsert: true, runValidators: true }
   );
 }
@@ -66,7 +66,7 @@ async function updateDoctorProfile(input, staffUser) {
 
   return DoctorProfileSettings.findOneAndUpdate(
     { key: "default" },
-    { $set: allowed, $setOnInsert: { key: "default" } },
+    { $set: allowed },
     { new: true, upsert: true, runValidators: true }
   );
 }
