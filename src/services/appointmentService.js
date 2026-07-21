@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const {
   Appointment,
   Counter,
@@ -11,6 +12,11 @@ const { maskPhone, normalizePhone, safePublicAppointment } = require("../utils/s
 const { normalizeTime, slotKey, activePatientDateKey } = require("../utils/time");
 const { ensureSlotBookable } = require("./availabilityService");
 const { audit } = require("./auditService");
+const {
+  enqueueOwnerAppointmentEmail,
+  attachOwnerEmailStatuses,
+  kickOwnerEmailWorker
+} = require("./ownerEmailOutboxService");
 
 const activeStatuses = ["scheduled", "rescheduled"];
 
@@ -121,7 +127,7 @@ async function createAppointment(input, options = {}) {
   const tokenNumber = await generateTokenNumber(input.date);
 
   try {
-    const appointment = await Appointment.create({
+    const appointmentData = {
       appointmentId,
       tokenNumber,
       patient: patient._id,
@@ -142,7 +148,21 @@ async function createAppointment(input, options = {}) {
       consent: consent._id,
       source,
       createdBy: options.staffUser?._id
-    });
+    };
+    let appointment;
+    let ownerEmailJob;
+
+    if (config.emailAppointmentAlert.enabled) {
+      await mongoose.connection.transaction(async (session) => {
+        [appointment] = await Appointment.create([appointmentData], { session });
+        ownerEmailJob = await enqueueOwnerAppointmentEmail(appointment, {
+          session,
+          requestId: options.req?.requestId
+        });
+      });
+    } else {
+      appointment = await Appointment.create(appointmentData);
+    }
 
     const { scheduleAppointmentReminders } = require("./reminderService");
     await scheduleAppointmentReminders(appointment);
@@ -163,6 +183,7 @@ async function createAppointment(input, options = {}) {
       req: options.req
     });
 
+    kickOwnerEmailWorker(ownerEmailJob?._id);
     return appointment;
   } catch (error) {
     if (error.code === 11000) {
@@ -198,13 +219,14 @@ async function listAppointments(query = {}) {
   }
 
   const limit = Math.min(Number(query.limit) || 100, 300);
-  return Appointment.find(filter).sort({ date: 1, time: 1 }).limit(limit).lean();
+  const appointments = await Appointment.find(filter).sort({ date: 1, time: 1 }).limit(limit).lean();
+  return attachOwnerEmailStatuses(appointments);
 }
 
 async function getAppointmentById(id) {
   const appointment = await Appointment.findById(id);
   if (!appointment) throw notFound("Appointment was not found.");
-  return appointment;
+  return attachOwnerEmailStatuses(appointment);
 }
 
 async function rescheduleAppointment({ appointmentId, phone, date, time, reason }, options = {}) {

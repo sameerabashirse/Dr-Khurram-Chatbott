@@ -2,21 +2,29 @@ services:
   app:
     build: .
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     ports:
       - "3000:3000"
     env_file:
       - .env
     environment:
-      MONGODB_URI: mongodb://mongo:27017/dr-khurram-chatbot
+      MONGODB_URI: mongodb://mongo:27017/dr-khurram-chatbot?replicaSet=rs0&directConnection=true
     restart: unless-stopped
 
   mongo:
     image: mongo:7
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'try { rs.status().ok } catch (error) { rs.initiate({_id:\"rs0\",members:[{_id:0,host:\"mongo:27017\"}]}).ok }' | grep 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 10s
     restart: unless-stopped
 
 volumes:

@@ -36,6 +36,12 @@ function readNumber(name, fallback) {
   return Number.isFinite(value) ? value : fallback;
 }
 
+function readBoolean(name, fallback = false) {
+  const value = process.env[name];
+  if (value === undefined || value === "") return fallback;
+  return String(value).trim().toLowerCase() === "true";
+}
+
 function readOrigins() {
   return read("CORS_ORIGINS", read("FRONTEND_URL", "http://localhost:3000"))
     .split(",")
@@ -57,6 +63,21 @@ const config = {
   refreshTokenTtlDays: readNumber("REFRESH_TOKEN_TTL_DAYS", 30),
   clinicTimezone: read("CLINIC_TIMEZONE", "Asia/Karachi"),
   clinicContactNumber: read("CLINIC_CONTACT_NUMBER", "+92 324 4754566"),
+  adminPanelUrl: read("ADMIN_PANEL_URL", "https://admin.nighatmedicalcomplex.com"),
+  emailAppointmentAlert: {
+    enabled: readBoolean("EMAIL_APPOINTMENT_ALERT_ENABLED", false),
+    to: read("EMAIL_APPOINTMENT_ALERT_TO").trim(),
+    fromName: read("EMAIL_FROM_NAME", "Nighat Medical Complex").trim(),
+    fromAddress: read("EMAIL_FROM_ADDRESS").trim(),
+    provider: read("EMAIL_PROVIDER", "smtp").trim().toLowerCase(),
+    smtp: {
+      host: read("SMTP_HOST").trim(),
+      port: readNumber("SMTP_PORT", 587),
+      secure: readBoolean("SMTP_SECURE", false),
+      user: read("SMTP_USER").trim(),
+      password: read("SMTP_PASSWORD")
+    }
+  },
   openaiApiKey: read("OPENAI_API_KEY"),
   openaiModel: read("OPENAI_MODEL", "gpt-4o-mini"),
   whatsapp: {
@@ -75,4 +96,4 @@ const config = {
   }
 };
 
-module.exports = { config };
+module.exports = { config, readBoolean };

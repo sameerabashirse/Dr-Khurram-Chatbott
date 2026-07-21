@@ -14,6 +14,7 @@ const { requireAuth } = require("../middleware/auth");
 const { publicFormLimiter } = require("../middleware/security");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { badRequest } = require("../utils/errors");
+const { retryOwnerAppointmentEmail } = require("../services/ownerEmailOutboxService");
 
 const router = express.Router();
 
@@ -82,6 +83,14 @@ router.post("/manual", requireAuth, asyncHandler(async (req, res) => {
   const input = validate(appointmentSchema.extend({ consentGiven: z.boolean().optional() }), req.body);
   const appointment = await createAppointment({ ...input, consentGiven: true }, { source: "staff", staffUser: req.user, req });
   res.status(201).json({ success: true, appointment });
+}));
+
+router.post("/:id/owner-email/retry", requireAuth, asyncHandler(async (req, res) => {
+  const ownerEmailNotification = await retryOwnerAppointmentEmail(req.params.id, {
+    staffUser: req.user,
+    req
+  });
+  res.json({ success: true, ownerEmailNotification });
 }));
 
 router.get("/:id", requireAuth, asyncHandler(async (req, res) => {

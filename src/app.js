@@ -1,4 +1,5 @@
 const path = require("path");
+const { randomUUID } = require("crypto");
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
@@ -15,6 +16,13 @@ function createApp() {
 
   app.set("trust proxy", 1);
   app.disable("x-powered-by");
+
+  app.use((req, res, next) => {
+    const incoming = String(req.get("x-request-id") || "");
+    req.requestId = /^[a-zA-Z0-9._-]{8,100}$/.test(incoming) ? incoming : randomUUID();
+    res.setHeader("X-Request-Id", req.requestId);
+    next();
+  });
 
   app.use(helmet({
     contentSecurityPolicy: {

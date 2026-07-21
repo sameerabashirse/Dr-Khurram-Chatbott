@@ -127,6 +127,28 @@ Set `OPENAI_API_KEY` and optionally `OPENAI_MODEL`. If OpenAI is not configured,
 
 The assistant is constrained to appointment management, clinic information, safe emergency guidance, and staff escalation. It does not diagnose, prescribe, or replace a doctor.
 
+## Owner Appointment Email Alerts
+
+New confirmed appointments can queue one durable owner notification after the appointment and outbox record commit in the same MongoDB transaction. The worker sends through SMTP, uses an expiring lock to recover interrupted work, and retries temporary failures after 1 minute, 5 minutes, 15 minutes, and 1 hour. Email failure never changes the appointment.
+
+The feature is disabled by default. Configure these values privately in the hosting environment:
+
+```text
+EMAIL_APPOINTMENT_ALERT_ENABLED=true
+EMAIL_APPOINTMENT_ALERT_TO
+EMAIL_FROM_NAME
+EMAIL_FROM_ADDRESS
+EMAIL_PROVIDER=smtp
+SMTP_HOST
+SMTP_PORT
+SMTP_SECURE
+SMTP_USER
+SMTP_PASSWORD
+ADMIN_PANEL_URL
+```
+
+Do not commit real addresses or SMTP credentials. The MongoDB deployment must support transactions; the included Docker Compose MongoDB service runs as a single-node replica set for local development.
+
 ## Appointment Rules
 
 - Open Monday-Friday only.

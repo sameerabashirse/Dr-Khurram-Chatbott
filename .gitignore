@@ -7,3 +7,5 @@ coverage/
 tmp/
 logs/
 *.local
+docker_logs.txt
+docker_status.txt

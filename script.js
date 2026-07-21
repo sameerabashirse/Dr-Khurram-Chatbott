@@ -315,12 +315,17 @@
                 <td><strong>${escapeHtml(appointment.appointmentId)}</strong><br><span class="badge">Token ${escapeHtml(appointment.tokenNumber)}</span></td>
                 <td>${escapeHtml(appointment.patientSnapshot?.fullName)}<br>${escapeHtml(appointment.patientSnapshot?.phoneMasked)}</td>
                 <td>${escapeHtml(appointment.date)}<br>${escapeHtml(appointment.time)}</td>
-                <td><span class="badge">${escapeHtml(appointment.status)}</span><br>${escapeHtml(appointment.reminderStatus)}</td>
+                <td>
+                  <span class="badge">${escapeHtml(appointment.status)}</span><br>
+                  ${escapeHtml(appointment.reminderStatus)}<br>
+                  <span class="badge">Owner email: ${escapeHtml(appointment.ownerEmailNotification?.label || "Not configured")}</span>
+                </td>
                 <td>
                   <button class="button ghost" type="button" data-status="visited" data-id="${escapeHtml(appointment._id)}">Visited</button>
                   <button class="button ghost" type="button" data-status="no_show" data-id="${escapeHtml(appointment._id)}">No-show</button>
                   <button class="button ghost" type="button" data-reschedule="${escapeHtml(appointment.appointmentId)}">Reschedule</button>
                   <button class="button danger" type="button" data-cancel="${escapeHtml(appointment.appointmentId)}">Cancel</button>
+                  ${appointment.ownerEmailNotification?.canRetry ? `<button class="button ghost" type="button" data-retry-email="${escapeHtml(appointment._id)}">Retry Email</button>` : ""}
                 </td>
               </tr>
             `).join("")}
@@ -340,7 +345,9 @@
     $("#appointments-table")?.addEventListener("click", async (event) => {
       const button = event.target.closest("button");
       if (!button) return;
+      if (button.disabled) return;
       try {
+        button.disabled = true;
         if (button.dataset.status) {
           await api(`/api/appointments/${button.dataset.id}/status`, {
             method: "PATCH",
@@ -366,8 +373,15 @@
             body: { date, time, reason: "Rescheduled by staff" }
           });
         }
+        if (button.dataset.retryEmail) {
+          await api(`/api/appointments/${button.dataset.retryEmail}/owner-email/retry`, {
+            method: "POST",
+            auth: true
+          });
+        }
         loadAppointments();
       } catch (error) {
+        button.disabled = false;
         alert(error.message);
       }
     });

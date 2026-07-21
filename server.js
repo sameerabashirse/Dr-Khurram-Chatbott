@@ -2,6 +2,7 @@ const { config } = require("./src/config/env");
 const { connectDatabase } = require("./src/config/db");
 const { createApp } = require("./src/app");
 const { startReminderScheduler } = require("./src/services/reminderService");
+const { startOwnerEmailScheduler } = require("./src/services/ownerEmailOutboxService");
 
 async function main() {
   await connectDatabase();
@@ -12,6 +13,7 @@ async function main() {
   });
 
   startReminderScheduler();
+  startOwnerEmailScheduler();
 
   const shutdown = async (signal) => {
     console.log(`${signal} received. Shutting down gracefully.`);

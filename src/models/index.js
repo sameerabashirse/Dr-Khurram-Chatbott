@@ -251,6 +251,37 @@ const notificationSchema = new Schema({
   readBy: [{ type: Schema.Types.ObjectId, ref: "StaffUser" }]
 }, baseOptions);
 
+const emailNotificationOutboxSchema = new Schema({
+  appointmentId: { type: Schema.Types.ObjectId, ref: "Appointment", required: true, index: true },
+  notificationType: { type: String, enum: ["OWNER_NEW_APPOINTMENT_EMAIL"], required: true },
+  channel: { type: String, enum: ["email"], default: "email", required: true },
+  recipient: { type: String, default: "", trim: true },
+  requestId: { type: String, maxlength: 100 },
+  templateKey: { type: String, default: "owner-new-appointment", required: true },
+  status: {
+    type: String,
+    enum: ["queued", "sending", "sent", "failed", "dead_letter"],
+    default: "queued",
+    index: true
+  },
+  attemptCount: { type: Number, default: 0, min: 0 },
+  nextRetryAt: { type: Date, default: Date.now, index: true },
+  lockedAt: { type: Date },
+  lockExpiresAt: { type: Date, index: true },
+  lastAttemptAt: { type: Date },
+  providerMessageId: { type: String, maxlength: 500 },
+  sentAt: { type: Date },
+  failedAt: { type: Date },
+  failureCode: { type: String, maxlength: 100 },
+  failureMessageSafe: { type: String, maxlength: 300 }
+}, baseOptions);
+
+emailNotificationOutboxSchema.index(
+  { appointmentId: 1, notificationType: 1, recipient: 1 },
+  { unique: true }
+);
+emailNotificationOutboxSchema.index({ status: 1, nextRetryAt: 1, lockExpiresAt: 1 });
+
 const auditLogSchema = new Schema({
   actorType: { type: String, enum: ["staff", "patient", "system", "whatsapp"], required: true },
   actorStaff: { type: Schema.Types.ObjectId, ref: "StaffUser" },
@@ -284,6 +315,7 @@ const models = {
   AvailableTimeSlot: mongoose.model("AvailableTimeSlot", availableTimeSlotSchema),
   ReminderJob: mongoose.model("ReminderJob", reminderJobSchema),
   Notification: mongoose.model("Notification", notificationSchema),
+  EmailNotificationOutbox: mongoose.model("EmailNotificationOutbox", emailNotificationOutboxSchema),
   AuditLog: mongoose.model("AuditLog", auditLogSchema)
 };
 
