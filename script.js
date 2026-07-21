@@ -199,7 +199,7 @@
       ]);
       const profile = doctorData.doctorProfile || {};
       $("#doctor-name").textContent = profile.doctorName || "Dr. Khurram";
-      $("#doctor-contact").textContent = profile.contactNumber || "+92 335 7504478";
+      $("#doctor-contact").textContent = profile.contactNumber || "+92 324 4754566";
       $("#doctor-specialty").textContent = profile.specialty || "Pending verification";
       $("#doctor-qualifications").textContent = profile.qualifications || "Pending verification";
       $("#doctor-experience").textContent = profile.experience || "Pending verification";

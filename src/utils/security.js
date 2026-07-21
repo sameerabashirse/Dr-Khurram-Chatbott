@@ -35,7 +35,7 @@ function safePublicAppointment(appointment) {
     status: appointment.status,
     reminderStatus: appointment.reminderStatus,
     confirmationMessageStatus: appointment.confirmationMessageStatus,
-    clinicContactNumber: "+92 335 7504478"
+    clinicContactNumber: "+92 324 4754566"
   };
 }
 

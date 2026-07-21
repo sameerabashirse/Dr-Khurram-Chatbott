@@ -180,7 +180,7 @@ const messageDeliveryStatusSchema = new Schema({
 
 const clinicSettingsSchema = new Schema({
   key: { type: String, default: "default", unique: true },
-  contactNumber: { type: String, default: "+92 335 7504478" },
+  contactNumber: { type: String, default: "+92 324 4754566" },
   timezone: { type: String, default: "Asia/Karachi" },
   slotDurationMinutes: { type: Number, default: 30, min: 5, max: 240 },
   weeklyHours: [{
@@ -197,7 +197,7 @@ const clinicSettingsSchema = new Schema({
 const doctorProfileSettingsSchema = new Schema({
   key: { type: String, default: "default", unique: true },
   doctorName: { type: String, default: "Dr. Khurram" },
-  contactNumber: { type: String, default: "+92 335 7504478" },
+  contactNumber: { type: String, default: "+92 324 4754566" },
   specialty: { type: String, default: "" },
   qualifications: { type: String, default: "" },
   experience: { type: String, default: "" },

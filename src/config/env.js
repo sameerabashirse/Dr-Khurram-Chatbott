@@ -56,7 +56,7 @@ const config = {
   accessTokenTtl: read("ACCESS_TOKEN_TTL", "15m"),
   refreshTokenTtlDays: readNumber("REFRESH_TOKEN_TTL_DAYS", 30),
   clinicTimezone: read("CLINIC_TIMEZONE", "Asia/Karachi"),
-  clinicContactNumber: read("CLINIC_CONTACT_NUMBER", "+92 335 7504478"),
+  clinicContactNumber: read("CLINIC_CONTACT_NUMBER", "+92 324 4754566"),
   openaiApiKey: read("OPENAI_API_KEY"),
   openaiModel: read("OPENAI_MODEL", "gpt-4o-mini"),
   whatsapp: {
