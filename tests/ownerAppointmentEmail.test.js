@@ -166,6 +166,12 @@ test("SMTP errors are classified into bounded retry categories", () => {
 });
 
 test("admin status exposes only queued, sent, failed and retry eligibility", () => {
+  const enabled = config.emailAppointmentAlert.enabled;
+  config.emailAppointmentAlert.enabled = true;
+  assert.deepEqual(publicOwnerEmailStatus(null), { status: "not_sent", label: "Not sent", canRetry: true });
+  config.emailAppointmentAlert.enabled = false;
+  assert.deepEqual(publicOwnerEmailStatus(null), { status: "not_configured", label: "Not configured", canRetry: false });
+  config.emailAppointmentAlert.enabled = enabled;
   assert.deepEqual(publicOwnerEmailStatus({ status: "queued" }), { status: "queued", label: "Queued", canRetry: false });
   assert.deepEqual(publicOwnerEmailStatus({ status: "sending" }), { status: "queued", label: "Queued", canRetry: false });
   assert.deepEqual(publicOwnerEmailStatus({ status: "sent" }), { status: "sent", label: "Sent", canRetry: false });

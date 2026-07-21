@@ -2,7 +2,12 @@ const { config } = require("../config/env");
 const { randomUUID } = require("crypto");
 const { Appointment, EmailNotificationOutbox } = require("../models");
 const { AppError } = require("../utils/errors");
-const { maskEmail, normalizeEmail, EmailDeliveryError } = require("./emailTransport");
+const {
+  maskEmail,
+  normalizeEmail,
+  validateEmailConfiguration,
+  EmailDeliveryError
+} = require("./emailTransport");
 const { sendOwnerAppointmentEmail } = require("./ownerAppointmentEmailService");
 const { audit } = require("./auditService");
 
@@ -146,7 +151,11 @@ function kickOwnerEmailWorker(outboxId) {
 }
 
 function publicOwnerEmailStatus(job) {
-  if (!job) return { status: "not_configured", label: "Not configured", canRetry: false };
+  if (!job) {
+    return config.emailAppointmentAlert.enabled
+      ? { status: "not_sent", label: "Not sent", canRetry: true }
+      : { status: "not_configured", label: "Not configured", canRetry: false };
+  }
   if (job.status === "sent") return { status: "sent", label: "Sent", canRetry: false };
   if (["failed", "dead_letter"].includes(job.status)) return { status: "failed", label: "Failed", canRetry: true };
   return { status: "queued", label: "Queued", canRetry: false };
@@ -171,7 +180,11 @@ async function attachOwnerEmailStatuses(appointments) {
 async function retryOwnerAppointmentEmail(appointmentId, options = {}) {
   const appointment = await Appointment.findById(appointmentId);
   if (!appointment) throw new AppError(404, "NOT_FOUND", "Appointment was not found.");
-  const job = await EmailNotificationOutbox.findOneAndUpdate(
+  if (!["scheduled", "rescheduled"].includes(appointment.status)) {
+    throw new AppError(409, "EMAIL_RETRY_NOT_AVAILABLE", "Owner email is available only for active appointments.");
+  }
+
+  let job = await EmailNotificationOutbox.findOneAndUpdate(
     {
       appointmentId: appointment._id,
       notificationType: NOTIFICATION_TYPE,
@@ -195,7 +208,17 @@ async function retryOwnerAppointmentEmail(appointmentId, options = {}) {
     if (existing?.status === "sent") {
       throw new AppError(409, "EMAIL_ALREADY_SENT", "The owner email has already been sent.");
     }
-    throw new AppError(409, "EMAIL_RETRY_NOT_AVAILABLE", "The owner email is not available for retry.");
+    if (existing) {
+      throw new AppError(409, "EMAIL_RETRY_NOT_AVAILABLE", "The owner email is already queued for delivery.");
+    }
+    try {
+      validateEmailConfiguration();
+    } catch (error) {
+      throw new AppError(409, error.code || "EMAIL_CONFIGURATION_MISSING", safeFailureMessage(error.code));
+    }
+    job = await enqueueOwnerAppointmentEmail(appointment, {
+      requestId: options.req?.requestId
+    });
   }
   await audit({
     actorType: "staff",

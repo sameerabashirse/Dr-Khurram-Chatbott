@@ -275,3 +275,24 @@ test("manual retry reuses the outbox, never recreates appointment, and refuses a
     (error) => error.code === "EMAIL_ALREADY_SENT"
   );
 });
+
+test("manual retry creates a missing outbox for an appointment booked before email was enabled", async () => {
+  const appointment = await Appointment.create(appointmentData());
+  let sendCount = 0;
+  setTransportForTests({ sendMail: async () => { sendCount += 1; return { messageId: "recovered-missing-outbox" }; } });
+
+  const status = await retryOwnerAppointmentEmail(appointment._id);
+  assert.equal(status.status, "queued");
+
+  for (let index = 0; index < 30; index += 1) {
+    const job = await EmailNotificationOutbox.findOne({ appointmentId: appointment._id });
+    if (job?.status === "sent") break;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+
+  const job = await EmailNotificationOutbox.findOne({ appointmentId: appointment._id });
+  assert.equal(job.status, "sent");
+  assert.equal(await EmailNotificationOutbox.countDocuments({ appointmentId: appointment._id }), 1);
+  assert.equal(await Appointment.countDocuments({ _id: appointment._id }), 1);
+  assert.equal(sendCount, 1);
+});
